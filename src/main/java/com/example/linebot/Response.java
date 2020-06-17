@@ -75,12 +75,12 @@ public class Response {
     }
 
     private void reply(String replyToken, String... texts) {
-        Message[] messageList = Arrays
+        Message[] messages = Arrays
                 .stream(texts)
                 .map(TextMessage::new)
                 .collect(Collectors.toList())
                 .toArray(new Message[texts.length]);
-        reply(replyToken, messageList);
+        reply(replyToken, messages);
     }
 
     private void reply(String replyToken, Message... messages) {
