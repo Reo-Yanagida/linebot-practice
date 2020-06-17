@@ -1,3 +1,2 @@
-# linebot-practice
-## 導入資料  
+# linebot-practice  
 今後のためにもlinebotについての情報をまとめたやつです
