@@ -75,22 +75,12 @@ public class Response {
     }
 
     private void reply(String replyToken, String... texts) {
-        try {
-            List<Message> messageList = Arrays
-                    .stream(texts)
-                    .map(TextMessage::new)
-                    .collect(Collectors.toList());
-            BotApiResponse botApiResponse = lineMessagingClient
-                    .replyMessage(
-                            new ReplyMessage(
-                                    replyToken,
-                                    messageList
-                            )
-                    )
-                    .get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
+        Message[] messageList = Arrays
+                .stream(texts)
+                .map(TextMessage::new)
+                .collect(Collectors.toList())
+                .toArray(new Message[texts.length]);
+        reply(replyToken, messageList);
     }
 
     private void reply(String replyToken, Message... messages) {
