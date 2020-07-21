@@ -2,7 +2,7 @@ package com.example.linebot;
 
 import com.linecorp.bot.client.LineMessagingClient;
 import com.linecorp.bot.model.ReplyMessage;
-import com.linecorp.bot.model.action.PostbackAction;
+import com.linecorp.bot.model.action.*;
 import com.linecorp.bot.model.event.Event;
 import com.linecorp.bot.model.event.FollowEvent;
 import com.linecorp.bot.model.event.MessageEvent;
@@ -49,20 +49,28 @@ public class Response {
     public void handleTextMessageEvent(MessageEvent<TextMessageContent> event) {
         this.reply(
                 event.getReplyToken(),
-                new TemplateMessage("test",
-                        new ButtonsTemplate(
-                                URI.create("https://4.bp.blogspot.com/-grFsR7IJJTs/Us_NJ_QCtZI/AAAAAAAAdFc/Lyf0Qem4p0c/s800/car_bus.png"),
-                                "BUS",
-                                "目的地を選択して下さい",
-                                Arrays.asList(
-                                        new PostbackAction("千歳駅", "CK"),
-                                        new PostbackAction("千歳駅", "CK"),
-                                        new PostbackAction("千歳駅", "CK"),
-                                        new PostbackAction("千歳駅", "CK")
+                TemplateMessage.builder()
+                        .altText("test")
+                        .template(ButtonsTemplate.builder()
+                                .thumbnailImageUrl(URI.create("https://4.bp.blogspot.com/-grFsR7IJJTs/Us_NJ_QCtZI/AAAAAAAAdFc/Lyf0Qem4p0c/s800/car_bus.png"))
+                                .title("BUS")
+                                .text("目的地を選択してください")
+                                .actions(Arrays.asList(
+                                        PostbackAction.builder()
+                                                .label("家")
+                                                .data("HOME")
+                                                .build(),
+                                        PostbackAction.builder()
+                                                .label("家")
+                                                .data("HOME")
+                                                .build()
+                                        )
                                 )
+                                .build()
                         )
-                )
+                        .build()
         );
+
     }
 
     /**
@@ -73,27 +81,22 @@ public class Response {
         System.out.println("event: " + event);
     }
 
+    private void reply(String replyToken, Message... messages) {
+        try {
+            BotApiResponse botApiResponse = lineMessagingClient
+                    .replyMessage(new ReplyMessage(replyToken, Arrays.asList(messages)))
+                    .get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void reply(String replyToken, String... texts) {
         Message[] messages = Arrays
                 .stream(texts)
                 .map(TextMessage::new)
                 .collect(Collectors.toList())
                 .toArray(new Message[texts.length]);
-        reply(replyToken, messages);
-    }
-
-    private void reply(String replyToken, Message... messages) {
-        try {
-            BotApiResponse botApiResponse = lineMessagingClient
-                    .replyMessage(
-                            new ReplyMessage(
-                                    replyToken,
-                                    Arrays.asList(messages)
-                            )
-                    )
-                    .get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
+        this.reply(replyToken, messages);
     }
 }
