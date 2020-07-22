@@ -1,25 +1,18 @@
 package com.example.linebot;
 
-import com.linecorp.bot.client.LineMessagingClient;
-import com.linecorp.bot.model.ReplyMessage;
 import com.linecorp.bot.model.action.*;
 import com.linecorp.bot.model.event.Event;
 import com.linecorp.bot.model.event.FollowEvent;
 import com.linecorp.bot.model.event.MessageEvent;
 import com.linecorp.bot.model.event.message.TextMessageContent;
-import com.linecorp.bot.model.message.Message;
 import com.linecorp.bot.model.message.TemplateMessage;
-import com.linecorp.bot.model.message.TextMessage;
 import com.linecorp.bot.model.message.template.ButtonsTemplate;
-import com.linecorp.bot.model.response.BotApiResponse;
 import com.linecorp.bot.spring.boot.annotation.EventMapping;
 import com.linecorp.bot.spring.boot.annotation.LineMessageHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
 import java.util.Arrays;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 /**
  * @author Miura Kazuto
@@ -27,11 +20,11 @@ import java.util.stream.Collectors;
 @LineMessageHandler
 public class Response {
 
-    private final LineMessagingClient lineMessagingClient;
+    private final ISendService sendService;
 
     @Autowired
-    public Response(LineMessagingClient lineMessagingClient) {
-        this.lineMessagingClient = lineMessagingClient;
+    public Response(ISendService sendService) {
+        this.sendService = sendService;
     }
 
     /**
@@ -39,7 +32,7 @@ public class Response {
      */
     @EventMapping
     public void handleFollowEvent(FollowEvent event) {
-        this.reply(
+        sendService.reply(
                 event.getReplyToken(),
                 "登録してくれてありがとう!"
         );
@@ -47,7 +40,7 @@ public class Response {
 
     @EventMapping
     public void handleTextMessageEvent(MessageEvent<TextMessageContent> event) {
-        this.reply(
+        sendService.reply(
                 event.getReplyToken(),
                 TemplateMessage.builder()
                         .altText("test")
@@ -70,7 +63,6 @@ public class Response {
                         )
                         .build()
         );
-
     }
 
     /**
@@ -79,24 +71,5 @@ public class Response {
     @EventMapping
     public void handleDefaultMessageEvent(Event event) {
         System.out.println("event: " + event);
-    }
-
-    private void reply(String replyToken, Message... messages) {
-        try {
-            BotApiResponse botApiResponse = lineMessagingClient
-                    .replyMessage(new ReplyMessage(replyToken, Arrays.asList(messages)))
-                    .get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void reply(String replyToken, String... texts) {
-        Message[] messages = Arrays
-                .stream(texts)
-                .map(TextMessage::new)
-                .collect(Collectors.toList())
-                .toArray(new Message[texts.length]);
-        this.reply(replyToken, messages);
     }
 }
